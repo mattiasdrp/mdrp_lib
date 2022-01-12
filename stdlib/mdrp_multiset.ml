@@ -1,0 +1,207 @@
+module Make (X : Stdlib.Set.OrderedType) = struct
+  module M = Mdrp_map.Make (X)
+  include M
+
+  type elt = X.t
+
+  type t = int M.t
+  (** invariant: multiplicities are all > 0 *)
+
+  let empty = M.empty
+
+  let is_empty = M.is_empty
+
+  let mem = M.mem
+
+  let occ x b = try M.find x b with Not_found -> 0
+
+  let add x ?(mult = 1) b =
+    if mult < 0 then invalid_arg "add";
+    if mult = 0 then b
+    else
+      try
+        let m = M.find x b in
+        M.add x (m + mult) b
+      with Not_found -> M.add x mult b
+
+  let update x f b =
+    let f o =
+      let m = f (match o with None -> 0 | Some m -> m) in
+      if m < 0 then invalid_arg "update";
+      if m = 0 then None else Some m
+    in
+    M.update x f b
+
+  let singleton x = M.add x 1 M.empty
+
+  let remove x ?(mult = 1) b =
+    if mult < 0 then invalid_arg "remove";
+    if mult = 0 then b
+    else
+      M.update x
+        (function
+          | None | Some 1 -> None
+          | Some m when m <= mult -> None
+          | Some m -> Some (m - mult))
+        b
+
+  let remove_all = M.remove
+
+  let merge f b1 b2 =
+    let f x o1 o2 =
+      let m1 = match o1 with None -> 0 | Some m -> m in
+      let m2 = match o2 with None -> 0 | Some m -> m in
+      let m = f x m1 m2 in
+      if m < 0 then invalid_arg "merge";
+      if m = 0 then None else Some m
+    in
+    M.merge f b1 b2
+
+  let cardinal b = M.fold (fun _ m c -> m + c) b 0
+
+  let elements = M.bindings
+
+  let min_elt = M.min_binding
+
+  let min_elt_opt = M.min_binding_opt
+
+  let max_elt = M.max_binding
+
+  let max_elt_opt = M.max_binding_opt
+
+  let choose = M.choose
+
+  let choose_opt = M.choose_opt
+
+  let union b1 b2 =
+    M.merge
+      (fun _ o1 o2 ->
+        match (o1, o2) with
+        | None, None -> None
+        | None, Some m | Some m, None -> Some m
+        | Some m1, Some m2 -> Some (max m1 m2))
+      b1 b2
+
+  let sum b1 b2 =
+    M.merge
+      (fun _ o1 o2 ->
+        match (o1, o2) with
+        | None, None -> None
+        | None, Some m | Some m, None -> Some m
+        | Some m1, Some m2 -> Some (m1 + m2))
+      b1 b2
+
+  let inter b1 b2 =
+    M.merge
+      (fun _ o1 o2 ->
+        match (o1, o2) with
+        | None, None | None, Some _ | Some _, None -> None
+        | Some m1, Some m2 -> Some (min m1 m2))
+      b1 b2
+
+  let diff b1 b2 =
+    M.merge
+      (fun _ o1 o2 ->
+        match (o1, o2) with
+        | None, _ -> None
+        | Some m, None -> Some m
+        | Some m1, Some m2 when m1 <= m2 -> None
+        | Some m1, Some m2 -> Some (m1 - m2))
+      b1 b2
+
+  let disjoint b1 b2 = M.for_all (fun x1 _ -> not (mem x1 b2)) b1
+
+  let included b1 b2 = M.for_all (fun x1 m1 -> m1 <= occ x1 b2) b1
+
+  let iter = M.iter
+
+  let fold = M.fold
+
+  let for_all = M.for_all
+
+  let exists = M.exists
+
+  let filter = M.filter
+
+  let partition = M.partition
+
+  let split x b =
+    let l, m, r = M.split x b in
+    (l, (match m with None -> 0 | Some m -> m), r)
+
+  let find_first = M.find_first
+
+  let find_first_opt = M.find_first_opt
+
+  let find_last = M.find_last
+
+  let find_last_opt = M.find_last_opt
+
+  let map f =
+    let f m =
+      let m = f m in
+      if m <= 0 then invalid_arg "map";
+      m
+    in
+    M.map f
+
+  let mapi f =
+    let f x m =
+      let m = f x m in
+      if m <= 0 then invalid_arg "mapi";
+      m
+    in
+    M.mapi f
+
+  let mul b n =
+    if n < 0 then invalid_arg "mul";
+    if n = 0 then empty else map (fun m -> m * n) b
+
+  let div b1 b2 =
+    if is_empty b2 then (0, b1)
+    else
+      try
+        let update x m1 q =
+          let m2 = occ x b2 in
+          if m2 = 0 || m2 > m1 then raise Exit;
+          min q (m1 / m2)
+        in
+        let q = fold update b1 max_int in
+        assert (q > 0);
+        let remainder x m1 r =
+          let mult = m1 - (q * occ x b2) in
+          add ~mult x r
+        in
+        let r = fold remainder b1 empty in
+        (q, r)
+      with Exit -> (0, b1)
+
+  let divi b n =
+    if n <= 0 then invalid_arg "divi";
+    let update x m (q, r) = (add ~mult:(m / n) x q, add ~mult:(m mod n) x r) in
+    fold update b (empty, empty)
+
+  let compare = M.compare Stdlib.compare
+
+  let equal = M.equal ( == )
+
+  let to_seq = M.to_seq
+
+  let to_seq_from = M.to_seq_from
+
+  let add_seq s b = Seq.fold_left (fun b (x, mult) -> add x ~mult b) b s
+
+  let of_seq s = add_seq s empty
+
+  let pp pp_e ppf b =
+    Format.fprintf ppf "{@[";
+    let first = ref true in
+    iter
+      (fun x m ->
+        if not !first then Format.fprintf ppf ",";
+        first := false;
+        Format.fprintf ppf "@ %a:%d" pp_e x m)
+      b;
+    if not !first then Format.fprintf ppf " ";
+    Format.fprintf ppf "@]}"
+end

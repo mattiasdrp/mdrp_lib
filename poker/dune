@@ -1,0 +1,8 @@
+(library
+ (name mdrp_poker)
+  (libraries mdrp_lib mdrp_cards)
+)
+
+(env
+ (dev
+  (flags (:standard -warn-error -A))))

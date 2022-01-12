@@ -1,0 +1,34 @@
+module Make (V : Mdrp_value.Value) : sig
+  include Mdrp_value.Value
+
+  type t := t
+  (** The type of an interval.
+      - Lower bound is inclusive
+      - Upper bound is exclusive *)
+
+  val create : V.t -> V.t -> t
+
+  val included : V.t -> t -> bool
+
+  (* Distinct Interval Map. The intervals can't intersect. *)
+  module Map : sig
+    type key = t
+
+    type +'a t
+
+    val empty : 'a t
+
+    val add_exn : key -> 'a -> 'a t -> 'a t
+    (** Adds a (key, value) binding in the map.
+        Raises an exception if they interval used as the key intersects an already existing interval in the map. *)
+
+    val find_opt : V.t -> 'a t -> 'a option
+
+    val min_opt : 'a t -> V.t option
+
+    val max_opt : 'a t -> V.t option
+
+    val pp :
+      (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+  end
+end

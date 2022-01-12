@@ -1,0 +1,82 @@
+(** @canonical Mdrp_lib.Mdrp_array *)
+module Mdrp_array = Mdrp_lib__Mdrp_array
+
+
+(** @canonical Mdrp_lib.Mdrp_char *)
+module Mdrp_char = Mdrp_lib__Mdrp_char
+
+
+(** @canonical Mdrp_lib.Mdrp_country *)
+module Mdrp_country = Mdrp_lib__Mdrp_country
+
+
+(** @canonical Mdrp_lib.Mdrp_date *)
+module Mdrp_date = Mdrp_lib__Mdrp_date
+
+
+(** @canonical Mdrp_lib.Mdrp_fraction *)
+module Mdrp_fraction = Mdrp_lib__Mdrp_fraction
+
+
+(** @canonical Mdrp_lib.Mdrp_gen *)
+module Mdrp_gen = Mdrp_lib__Mdrp_gen
+
+
+(** @canonical Mdrp_lib.Mdrp_int *)
+module Mdrp_int = Mdrp_lib__Mdrp_int
+
+
+(** @canonical Mdrp_lib.Mdrp_interval *)
+module Mdrp_interval = Mdrp_lib__Mdrp_interval
+
+
+(** @canonical Mdrp_lib.Mdrp_list *)
+module Mdrp_list = Mdrp_lib__Mdrp_list
+
+
+(** @canonical Mdrp_lib.Mdrp_map *)
+module Mdrp_map = Mdrp_lib__Mdrp_map
+
+
+(** @canonical Mdrp_lib.Mdrp_math *)
+module Mdrp_math = Mdrp_lib__Mdrp_math
+
+
+(** @canonical Mdrp_lib.Mdrp_metric *)
+module Mdrp_metric = Mdrp_lib__Mdrp_metric
+
+
+(** @canonical Mdrp_lib.Mdrp_multiset *)
+module Mdrp_multiset = Mdrp_lib__Mdrp_multiset
+
+
+(** @canonical Mdrp_lib.Mdrp_option *)
+module Mdrp_option = Mdrp_lib__Mdrp_option
+
+
+(** @canonical Mdrp_lib.Mdrp_pair *)
+module Mdrp_pair = Mdrp_lib__Mdrp_pair
+
+
+(** @canonical Mdrp_lib.Mdrp_parse *)
+module Mdrp_parse = Mdrp_lib__Mdrp_parse
+
+
+(** @canonical Mdrp_lib.Mdrp_pqueue *)
+module Mdrp_pqueue = Mdrp_lib__Mdrp_pqueue
+
+
+(** @canonical Mdrp_lib.Mdrp_seq *)
+module Mdrp_seq = Mdrp_lib__Mdrp_seq
+
+
+(** @canonical Mdrp_lib.Mdrp_set *)
+module Mdrp_set = Mdrp_lib__Mdrp_set
+
+
+(** @canonical Mdrp_lib.Mdrp_string *)
+module Mdrp_string = Mdrp_lib__Mdrp_string
+
+
+(** @canonical Mdrp_lib.Mdrp_value *)
+module Mdrp_value = Mdrp_lib__Mdrp_value

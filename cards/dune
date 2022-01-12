@@ -1,0 +1,8 @@
+(library
+ (name mdrp_cards)
+  (libraries mdrp_lib)
+)
+
+(env
+ (dev
+  (flags (:standard -warn-error -A))))
