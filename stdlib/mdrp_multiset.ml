@@ -1,4 +1,8 @@
-module Make (X : Stdlib.Set.OrderedType) = struct
+module Make (X : sig
+  include Mdrp_types.Printable
+  include Mdrp_types.Comparable with type t := t
+end) =
+struct
   module M = Mdrp_map.Make (X)
   include M
 
@@ -8,11 +12,8 @@ module Make (X : Stdlib.Set.OrderedType) = struct
   (** invariant: multiplicities are all > 0 *)
 
   let empty = M.empty
-
   let is_empty = M.is_empty
-
   let mem = M.mem
-
   let occ x b = try M.find x b with Not_found -> 0
 
   let add x ?(mult = 1) b =
@@ -58,19 +59,12 @@ module Make (X : Stdlib.Set.OrderedType) = struct
     M.merge f b1 b2
 
   let cardinal b = M.fold (fun _ m c -> m + c) b 0
-
   let elements = M.bindings
-
   let min_elt = M.min_binding
-
   let min_elt_opt = M.min_binding_opt
-
   let max_elt = M.max_binding
-
   let max_elt_opt = M.max_binding_opt
-
   let choose = M.choose
-
   let choose_opt = M.choose_opt
 
   let union b1 b2 =
@@ -110,19 +104,12 @@ module Make (X : Stdlib.Set.OrderedType) = struct
       b1 b2
 
   let disjoint b1 b2 = M.for_all (fun x1 _ -> not (mem x1 b2)) b1
-
   let included b1 b2 = M.for_all (fun x1 m1 -> m1 <= occ x1 b2) b1
-
   let iter = M.iter
-
   let fold = M.fold
-
   let for_all = M.for_all
-
   let exists = M.exists
-
   let filter = M.filter
-
   let partition = M.partition
 
   let split x b =
@@ -130,11 +117,8 @@ module Make (X : Stdlib.Set.OrderedType) = struct
     (l, (match m with None -> 0 | Some m -> m), r)
 
   let find_first = M.find_first
-
   let find_first_opt = M.find_first_opt
-
   let find_last = M.find_last
-
   let find_last_opt = M.find_last_opt
 
   let map f =
@@ -182,15 +166,10 @@ module Make (X : Stdlib.Set.OrderedType) = struct
     fold update b (empty, empty)
 
   let compare = M.compare Stdlib.compare
-
   let equal = M.equal ( == )
-
   let to_seq = M.to_seq
-
   let to_seq_from = M.to_seq_from
-
   let add_seq s b = Seq.fold_left (fun b (x, mult) -> add x ~mult b) b s
-
   let of_seq s = add_seq s empty
 
   let pp pp_e ppf b =

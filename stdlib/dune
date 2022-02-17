@@ -1,9 +1,9 @@
 (library
  (name mdrp_lib)
-  (libraries zarith)
- (modules_without_implementation mdrp_array_bu)
-)
+ (libraries zarith)
+ (modules_without_implementation mdrp_array_bu))
 
 (env
  (dev
-  (flags (:standard -warn-error -A))))
+  (flags
+   (:standard -warn-error -A))))

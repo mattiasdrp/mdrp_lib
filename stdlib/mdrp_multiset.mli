@@ -1,9 +1,6 @@
 module Make (X : sig
-  type t
-
-  val compare : t -> t -> int
-  (** Multisets are implemented using [Map.Make] and therefore require elements
-      to be comparable. *)
+  include Mdrp_types.Printable
+  include Mdrp_types.Comparable with type t := t
 end) : sig
   type elt = X.t
 

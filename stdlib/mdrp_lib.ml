@@ -23,5 +23,7 @@ module Seq = Mdrp_seq
 module Set = Mdrp_set
 module String = Mdrp_string
 module Tree = Mdrp_tree
+module Trie = Mdrp_trie
 module Trigo = Mdrp_trigo
+module Types = Mdrp_types
 module Value = Mdrp_value

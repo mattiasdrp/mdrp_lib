@@ -6,17 +6,37 @@ type sign = Negative | Positive | Zero
 
 let compare_dec i1 i2 = compare i2 i1
 
-module Set = Mdrp_set.Make (Stdlib.Int)
+module Set = struct
+  let ppi = pp
 
-module PairSet = Mdrp_set.Make (struct
-  type t = int * int
+  include Mdrp_set.Make (Stdlib.Int)
 
-  let compare (a1, a2) (b1, b2) =
-    let c = compare a1 b1 in
-    if c = 0 then compare a2 b2 else c
+  let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
+      ?(right = "]") () ppf t =
+    pp ~pp_sep ~left ~right ppi ppf t
+end
+
+module PairSet = struct
+  let ppi = pp
+
+  include Mdrp_set.Make (struct
+    type t = int * int
+
+    let compare (a1, a2) (b1, b2) =
+      let c = compare a1 b1 in
+      if c = 0 then compare a2 b2 else c
+  end)
+
+  let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
+      ?(right = "]") () ppf t =
+    pp ~pp_sep ~left ~right Mdrp_pair.(pp ppi ppi) ppf t
+end
+
+module Map = Mdrp_map.Make (struct
+  include Stdlib.Int
+
+  let pp ppf d = Format.fprintf ppf "%d" d
 end)
-
-module Map = Mdrp_map.Make (Stdlib.Int)
 
 module PairMap = Mdrp_map.Make (struct
   type t = int * int
@@ -24,18 +44,22 @@ module PairMap = Mdrp_map.Make (struct
   let compare (a1, a2) (b1, b2) =
     let c = compare a1 b1 in
     if c = 0 then compare a2 b2 else c
+
+  let pp ppf (d1, d2) = Format.fprintf ppf "(%d, %d)" d1 d2
 end)
 
-module Multiset = Mdrp_multiset.Make (Int)
+module Multiset = Mdrp_multiset.Make (struct
+  include Stdlib.Int
+
+  let pp ppf d = Format.fprintf ppf "%d" d
+end)
 
 let swap_max k v ((_, vmax) as acc) = if v > vmax then (k, v) else acc
-
 let swap_min k v ((_, vmin) as acc) = if v < vmin then (k, v) else acc
 
 module Decimal = struct
   (* Fast exponentiation *)
   type t = int
-
   type digit = int
 
   (* Number of decimal digits *)
@@ -72,17 +96,11 @@ module Decimal = struct
     aux 0 l
 
   let reverse n = to_digits n |> List.rev |> of_digits
-
   let to_string n = to_string n
-
   let of_string s = int_of_string s
-
   let concatenate n1 n2 = of_string (to_string n1 ^ to_string n2)
-
   let is_palindrome i = Mdrp_string.is_palindrome (to_string i)
-
   let sign i = if i < 0 then Negative else if i > 0 then Positive else Zero
-
   let sqrt n = truncate (sqrt (float n))
 
   let is_square x =
@@ -346,7 +364,6 @@ end
 module Binary = struct
   (* Number of binary digits *)
   type t = string
-
   type digit = char
 
   let of_dec i =
@@ -368,13 +385,9 @@ module Binary = struct
     aux "" l
 
   let to_string n = n
-
   let of_string s = s
-
   let sign _ = Positive
-
   let pow _ = failwith "Not implemented"
-
   let to_digits t = List.of_seq @@ String.to_seq t
 end
 
@@ -382,7 +395,6 @@ module Z = struct
   include Z
 
   let minus_one = Z.of_int (-1)
-
   let pow x p = pow (of_int x) p
 
   let to_digits n =
