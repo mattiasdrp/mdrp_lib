@@ -1,5 +1,9 @@
+(documentation
+ (package mdrp_cards))
+
 (library
  (name mdrp_cards)
+ (public_name mdrp_cards)
  (libraries mdrp_lib))
 
 (env

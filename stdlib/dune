@@ -1,5 +1,9 @@
+(documentation
+ (package mdrp_lib))
+
 (library
  (name mdrp_lib)
+ (public_name mdrp_lib)
  (libraries zarith)
  (modules_without_implementation mdrp_array_bu))
 

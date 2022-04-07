@@ -7,7 +7,6 @@ module Float = Mdrp_float
 module Fraction = Mdrp_fraction
 module Gen = Mdrp_gen
 module Heap = Mdrp_heap
-module Input = Mdrp_input
 module Int = Mdrp_int
 module Interval = Mdrp_interval
 module List = Mdrp_list

@@ -3,7 +3,15 @@ module type S = sig
 
   val add_list : (key * 'a) list -> 'a t -> 'a t
   val of_list : (key * 'a) list -> 'a t
-  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val pp :
+    ?pp_sep:(Format.formatter -> unit -> unit) ->
+    ?left:string ->
+    ?right:string ->
+    (Format.formatter -> 'a -> unit) ->
+    Format.formatter ->
+    'a t ->
+    unit
 end
 
 module Make (X : sig
@@ -16,11 +24,10 @@ struct
   let add_list l t = List.fold_left (fun acc (e, v) -> add e v acc) t l
   let of_list l = add_list l empty
 
-  let pp pp_v ppf t =
-    Format.fprintf ppf "@[<v 0>%a@]"
-      Mdrp_list.(
-        pp ~left:"" ~right:"" ~pp_sep:Format.pp_print_cut
-          Mdrp_pair.(pp ~left:"" ~right:"" ~sep:": " X.pp pp_v))
-      (bindings t)
-  (* iter (fun k v -> Format.fprintf ppf "@[<v 2>%a:@,%a@]@," X.pp k pp_v v) t *)
+  let pp ?(pp_sep = Format.pp_print_cut) ?(left = "{") ?(right = "}") ppv ppf t
+      =
+    Mdrp_list.(
+      pp ~pp_sep ~left ~right
+        Mdrp_pair.(pp ~left:"" ~right:"" ~sep:": " X.pp ppv))
+      ppf (bindings t)
 end

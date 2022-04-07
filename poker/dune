@@ -1,5 +1,9 @@
+(documentation
+ (package mdrp_poker))
+
 (library
  (name mdrp_poker)
+ (public_name mdrp_poker)
  (libraries mdrp_lib mdrp_cards))
 
 (env
