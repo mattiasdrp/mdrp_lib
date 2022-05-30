@@ -14,6 +14,7 @@ module Map = Mdrp_map
 module Math = Mdrp_math
 module Metric = Mdrp_metric
 module Multiset = Mdrp_multiset
+module Offset_array = Mdrp_offset_array
 module Option = Mdrp_option
 module Pair = Mdrp_pair
 module Parse = Mdrp_parse

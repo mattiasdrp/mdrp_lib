@@ -133,7 +133,8 @@ module Decimal = struct
   let is_prime =
     let ht = Hashtbl.create 19 in
     fun n ->
-      Hashtbl.mem ht n
+      Set.mem n Aux_mdrp_primes.primes
+      || Hashtbl.mem ht n
       ||
       let lim = sqrt n in
       let rec aux d =
@@ -295,6 +296,13 @@ module Decimal = struct
 
     let multiples ?(start = 0) ?(limit = -1) m =
       Seq.unfold (multiples_aux m limit) start
+
+    let powers_aux base limit (currpow, exponent) =
+      if exponent > limit then None
+      else Some ((currpow, exponent), (currpow * base, exponent + 1))
+
+    let powers ?(limit = -1) ?(exponent = 1) base =
+      Seq.unfold (powers_aux base limit) (base, exponent)
 
     let divisors_aux n =
       let sn = sqrt n in

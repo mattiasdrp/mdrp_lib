@@ -61,7 +61,7 @@ module Matrix = struct
 
   let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[|")
       ?(right = "|]") pp ppf m =
-    Format.fprintf ppf "@[<v 2>%a@]"
+    Format.fprintf ppf "@[<v %d>%a@]" (String.length left)
       (pp_array ~pp_sep:Format.pp_print_cut ~left ~right
          (pp_array ~pp_sep ~left ~right pp))
       m
