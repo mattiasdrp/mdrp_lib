@@ -5,6 +5,7 @@ module Country = Mdrp_country
 module Date = Mdrp_date
 module Float = Mdrp_float
 module Fraction = Mdrp_fraction
+module Geometry = Mdrp_geometry
 module Gen = Mdrp_gen
 module Heap = Mdrp_heap
 module Int = Mdrp_int

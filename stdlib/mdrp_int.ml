@@ -272,11 +272,11 @@ module Decimal = struct
         Seq.unfold (primes_aux limit)
           (if start = 2 then start else if start % 2 then start + 1 else start)
 
-    let integers_aux limit n =
-      if limit > 0 && n > limit then None else Some (n, n + 1)
+    let integers_aux limit succ n =
+      if limit > 0 && n > limit then None else Some (n, succ n)
 
-    let integers ?(start = 0) ?(limit = -1) () =
-      Seq.unfold (integers_aux limit) start
+    let integers ?(start = 0) ?(limit = -1) ?(succ = succ) () =
+      Seq.unfold (integers_aux limit succ) start
 
     let digits_aux n =
       if n = -1 then None
@@ -304,20 +304,27 @@ module Decimal = struct
     let powers ?(limit = -1) ?(exponent = 1) base =
       Seq.unfold (powers_aux base limit) (base, exponent)
 
-    let divisors_aux n =
+    let divisors n =
       let sn = sqrt n in
-      let rec acc (d, store) =
+      let rec divisors_aux (d, store) =
         if d > sn then None
         else
           match store with
           | Some ds -> Some (ds, (d, None))
           | None ->
               if n mod d = 0 then Some (d, (d + 1, Some (n / d)))
-              else acc (d + 1, store)
+              else divisors_aux (d + 1, store)
       in
-      acc
+      Seq.unfold divisors_aux (1, None)
 
-    let divisors n = Seq.unfold (divisors_aux n) (1, None)
+    let pair_divisors n =
+      let sn = sqrt n in
+      let rec divisors_aux d =
+        if d > sn then None
+        else if n mod d = 0 then Some ((d, n / d), d + 1)
+        else divisors_aux (d + 1)
+      in
+      Seq.unfold divisors_aux 1
 
     let triangles_aux limit (acc, n) =
       if limit > 0 && n > limit then None
