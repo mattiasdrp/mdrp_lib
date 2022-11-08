@@ -12,7 +12,6 @@ module Int = Mdrp_int
 module Interval = Mdrp_interval
 module List = Mdrp_list
 module Map = Mdrp_map
-module Math = Mdrp_math
 module Metric = Mdrp_metric
 module Multiset = Mdrp_multiset
 module Offset_array = Mdrp_offset_array

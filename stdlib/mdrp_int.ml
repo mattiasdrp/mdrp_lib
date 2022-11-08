@@ -184,14 +184,6 @@ module Decimal = struct
       in
       aux Multiset.empty i 2
 
-  (* let prime_divisors n = *)
-  (*   let rec aux acc i d = *)
-  (*     if i = 1 then if Multiset.is_empty acc then Multiset.singleton n else acc *)
-  (*     else if i % d then aux (Multiset.add d acc) (i / d) d *)
-  (*     else aux acc i (d + 1) *)
-  (*   in *)
-  (*   aux Multiset.empty n 2 *)
-
   let nb_divisors n =
     let rec aux acc i d =
       if i = 1 then acc
@@ -206,25 +198,27 @@ module Decimal = struct
     let divs = prime_divisors n in
     Multiset.fold (fun d p acc -> acc * ((pow d (p + 1) - 1) / (d - 1))) divs 1
 
-  let modpow base exp modulus =
-    if nb_digits modulus * 2 > nb_digits max_int then
-      Z.(to_int (powm (of_int base) (of_int exp) (of_int modulus)))
-    else if modulus = 1 then 0
-    else
-      let rec aux base exp result =
-        if exp = 0 then result
-        else
-          let result =
-            if exp mod 2 = 1 then result * base mod modulus else result
-          in
-          aux (base * base mod modulus) (exp lsr 1) result
-      in
-      aux (base mod modulus) exp 1
-
   let same_digits t1 t2 =
     let l1 = to_digits t1 |> List.fast_sort compare in
     let l2 = to_digits t2 |> List.fast_sort compare in
     List.equal ( = ) l1 l2
+
+  module Modular_Arithmetic = struct
+    let modpow base exp modulus =
+      if nb_digits modulus * 2 > nb_digits max_int then
+        Z.(to_int (powm (of_int base) (of_int exp) (of_int modulus)))
+      else if modulus = 1 then 0
+      else
+        let rec aux base exp result =
+          if exp = 0 then result
+          else
+            let result =
+              if exp mod 2 = 1 then result * base mod modulus else result
+            in
+            aux (base * base mod modulus) (exp lsr 1) result
+        in
+        aux (base mod modulus) exp 1
+  end
 
   module Seq = struct
     let rec odd_composites_aux n =
