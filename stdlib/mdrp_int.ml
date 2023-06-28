@@ -7,30 +7,129 @@ type sign = Negative | Positive | Zero
 let compare_dec i1 i2 = compare i2 i1
 
 module Set = struct
-  let ppi = pp
+  include Mdrp_set.Make (struct
+    include Stdlib.Int
 
-  include Mdrp_set.Make (Stdlib.Int)
-
-  let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
-      ?(right = "]") () ppf t =
-    pp ~pp_sep ~left ~right ppi ppf t
+    let pp = pp
+  end)
 end
 
 module PairSet = struct
-  let ppi = pp
-
   include Mdrp_set.Make (struct
     type t = int * int
 
     let compare (a1, a2) (b1, b2) =
       let c = compare a1 b1 in
       if c = 0 then compare a2 b2 else c
-  end)
 
-  let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
-      ?(right = "]") () ppf t =
-    pp ~pp_sep ~left ~right Mdrp_pair.(pp ppi ppi) ppf t
+    let pp = Mdrp_pair.pp pp pp
+  end)
 end
+
+let primes =
+  [
+    2;
+    3;
+    5;
+    7;
+    11;
+    13;
+    17;
+    19;
+    23;
+    29;
+    31;
+    37;
+    41;
+    43;
+    47;
+    53;
+    59;
+    61;
+    67;
+    71;
+    73;
+    79;
+    83;
+    89;
+    97;
+    101;
+    103;
+    107;
+    109;
+    113;
+    127;
+    131;
+    137;
+    139;
+    149;
+    151;
+    157;
+    163;
+    167;
+    173;
+    179;
+    181;
+    191;
+    193;
+    197;
+    199;
+    211;
+    223;
+    227;
+    229;
+    233;
+    239;
+    241;
+    251;
+    257;
+    263;
+    269;
+    271;
+    277;
+    281;
+    283;
+    293;
+    307;
+    311;
+    313;
+    317;
+    331;
+    337;
+    347;
+    349;
+    353;
+    359;
+    367;
+    373;
+    379;
+    383;
+    389;
+    397;
+    401;
+    409;
+    419;
+    421;
+    431;
+    433;
+    439;
+    443;
+    449;
+    457;
+    461;
+    463;
+    467;
+    479;
+    487;
+    491;
+    499;
+    503;
+    509;
+    521;
+    523;
+    541;
+  ]
+  |> Set.of_list
 
 module Map = Mdrp_map.Make (struct
   include Stdlib.Int
@@ -80,6 +179,22 @@ module Decimal = struct
     if p < 0 then failwith "Failure: p < 0" else aux p
 
   let ( ** ) x p = pow x p
+
+  let gcd a b =
+    let rec aux a b = if b = 0 then a else aux b (a mod b) in
+    aux (max a b) (min a b)
+
+  (** [extended_gcd a b = r, u, v] such that [a.u + b.v = r] *)
+  let extended_gcd a b =
+    let rec aux r1 r2 u1 u2 v1 v2 =
+      if r2 = 0 then (r1, u1, v1)
+      else
+        let q = r1 / r2 in
+        aux r2 (r1 - (q * r2)) u2 (u1 - (q * u2)) v2 (v1 - (q * v2))
+    in
+    aux a b 0 1 1 0
+
+  let lcm a b = abs a * (abs b / gcd a b)
 
   let to_digits n =
     let rec aux n acc =
@@ -133,8 +248,7 @@ module Decimal = struct
   let is_prime =
     let ht = Hashtbl.create 19 in
     fun n ->
-      Set.mem n Aux_mdrp_primes.primes
-      || Hashtbl.mem ht n
+      Set.mem n primes || Hashtbl.mem ht n
       ||
       let lim = sqrt n in
       let rec aux d =
@@ -149,6 +263,23 @@ module Decimal = struct
          res
 
   external of_dec : int -> int = "%identity"
+
+  let to_bin ?extend t =
+    if t < 0 then invalid_arg "bin_of_dec"
+    else
+      let t =
+        if t = 0 then "0"
+        else
+          let rec aux acc d =
+            if d = 0 then acc else aux (string_of_int (d land 1) ^ acc) (d lsr 1)
+          in
+          aux "" t
+      in
+      match extend with
+      | None -> t
+      | Some length ->
+          Printf.sprintf "%*s" length t
+          |> String.map (function ' ' -> '0' | c -> c)
 
   let of_bin b =
     String.fold_right
@@ -204,6 +335,10 @@ module Decimal = struct
     List.equal ( = ) l1 l2
 
   module Modular_Arithmetic = struct
+    let add a b m = ((a mod m) + (b mod m)) mod m
+    let mul a b m = a mod m * (b mod m) mod m
+    let x a b c = a + (b * a) + c
+
     let modpow base exp modulus =
       if nb_digits modulus * 2 > nb_digits max_int then
         Z.(to_int (powm (of_int base) (of_int exp) (of_int modulus)))
@@ -218,6 +353,24 @@ module Decimal = struct
             aux (base * base mod modulus) (exp lsr 1) result
         in
         aux (base mod modulus) exp 1
+
+    let inverse a m =
+      let r, u, _ = extended_gcd m a in
+      assert (r = 1);
+      u
+
+    (** l is composed of (a, n) such that t = a [n] *)
+    let chinese_remainder l =
+      let big_n = List.fold_left (fun acc (_, n) -> n * acc) 1 l in
+      let res =
+        List.fold_left
+          (fun acc (a, n) ->
+            let y = big_n / n in
+            let z = inverse y n in
+            add acc (a * y * z) big_n)
+          0 l
+      in
+      if res < 0 then res + big_n else res
   end
 
   module Seq = struct
@@ -375,16 +528,10 @@ module Binary = struct
   type t = string
   type digit = char
 
-  let of_dec i =
-    if i < 0 then invalid_arg "bin_of_dec"
-    else if i = 0 then "0"
-    else
-      let rec aux acc d =
-        if d = 0 then acc else aux (string_of_int (d land 1) ^ acc) (d lsr 1)
-      in
-      aux "" i
-
+  let length = String.length
+  let pp ppf s = Format.fprintf ppf "%s" s
   let nb_digits = String.length
+  let to_digits t = List.of_seq @@ String.to_seq t
 
   let of_digits l =
     let rec aux res = function
@@ -393,11 +540,14 @@ module Binary = struct
     in
     aux "" l
 
-  let to_string n = n
+  let of_dec ?extend d = Decimal.to_bin ?extend d
+  let to_dec t = Decimal.of_bin t
+  let to_string t = t
   let of_string s = s
+  let to_bytes t = Bytes.of_string t
+  let of_bytes b = Bytes.to_string b
   let sign _ = Positive
   let pow _ = failwith "Not implemented"
-  let to_digits t = List.of_seq @@ String.to_seq t
 end
 
 module Z = struct

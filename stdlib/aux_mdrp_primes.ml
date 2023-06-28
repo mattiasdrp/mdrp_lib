@@ -1,4 +1,8 @@
-module IS = Set.Make (Stdlib.Int)
+module IS = Mdrp_set.Make (struct
+  include Stdlib.Int
+
+  let pp ppf n = Format.fprintf ppf "%d" n
+end)
 
 let primes =
   [
