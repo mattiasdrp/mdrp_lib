@@ -4,6 +4,29 @@ let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[|")
     ?(right = "|]") pp ppf a =
   Mdrp_list.pp ~pp_sep ~left ~right pp ppf (Array.to_list a)
 
+let compare cmp t1 t2 =
+  let l1 = length t1 in
+  let l2 = length t2 in
+  let c = Stdlib.Int.compare l1 l2 in
+  if c <> 0 then c
+  else
+    let rec aux i =
+      if i = l1 then 0
+      else
+        let c = cmp (unsafe_get t1 i) (unsafe_get t2 i) in
+        if c <> 0 then c else aux (i + 1)
+    in
+    aux 0
+
+let equal eq t1 t2 =
+  let l1 = length t1 in
+  let l2 = length t2 in
+  let rec aux i =
+    if i = l1 then true
+    else eq (unsafe_get t1 i) (unsafe_get t2 i) && aux (i + 1)
+  in
+  Stdlib.Int.equal l1 l2 && aux 0
+
 let ( .?() ) a i = try Some (Array.get a i) with Invalid_argument _ -> None
 
 let swap a i j =

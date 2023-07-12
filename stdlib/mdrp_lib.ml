@@ -3,6 +3,7 @@ module Bool = Mdrp_bool
 module Char = Mdrp_char
 module Country = Mdrp_country
 module Date = Mdrp_date
+module Earley = Mdrp_earley
 module Float = Mdrp_float
 module Fraction = Mdrp_fraction
 module Geometry = Mdrp_geometry

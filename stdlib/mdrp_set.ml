@@ -8,6 +8,7 @@ module type S = sig
     ?pp_sep:(Format.formatter -> unit -> unit) ->
     ?left:string ->
     ?right:string ->
+    unit ->
     Format.formatter ->
     t ->
     unit
@@ -24,6 +25,6 @@ struct
   let of_list l = add_list l empty
 
   let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
-      ?(right = "]") ppf t =
+      ?(right = "]") () ppf t =
     Mdrp_list.(pp ~pp_sep ~left ~right X.pp) ppf (elements t)
 end
