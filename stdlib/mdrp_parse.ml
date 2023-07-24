@@ -10,7 +10,7 @@ let lines file =
   in
   aux_parse []
 
-let fold_lines f acc file =
+let fold_lines ?(end_line = false) f acc file =
   let ci = open_in file in
 
   let rec aux_parse acc =
@@ -18,7 +18,7 @@ let fold_lines f acc file =
     | s -> aux_parse (f acc s)
     | exception End_of_file ->
         close_in ci;
-        acc
+        if end_line then f acc "" else acc
   in
   aux_parse acc
 

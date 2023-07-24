@@ -6,6 +6,18 @@ type sign = Negative | Positive | Zero
 
 let compare_dec i1 i2 = compare i2 i1
 
+module List = struct
+  let pp' = pp
+  let compare' = compare
+
+  include Mdrp_list
+
+  let pp ppf t = Mdrp_list.pp pp' ppf t
+  let compare t1 t2 = Mdrp_list.compare compare' t1 t2
+
+  type t = int list
+end
+
 module Set = struct
   include Mdrp_set.Make (struct
     include Stdlib.Int

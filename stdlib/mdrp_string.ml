@@ -22,6 +22,13 @@ module String = struct
     in
     aux 0 acc
 
+  let append_char t c = t ^ Char.escaped c
+  let prepend_char t c = Char.escaped c ^ t
+
+  let reverse t =
+    let l = length t in
+    init l (fun i -> t.[l - i - 1])
+
   let characters t =
     fold (fun acc c -> Mdrp_char.Set.add c acc) Mdrp_char.Set.empty t
 
@@ -34,13 +41,13 @@ module String = struct
         let sub_length =
           if i = separations - 1 then tlength - (i * sub_length) else sub_length
         in
-        String.sub t (i * sub_length) sub_length)
+        sub t (i * sub_length) sub_length)
 
   let to_list t = fold (fun acc c -> c :: acc) [] t |> List.rev
-  let to_array f t = Array.init (String.length t) (fun i -> f t.[i])
-  let to_arrayi f t = Array.init (String.length t) (fun i -> f i t.[i])
-  let delete_end t n = String.sub t 0 (String.length t - n)
-  let delete_start t n = String.sub t n (String.length t - n)
+  let to_array f t = Array.init (length t) (fun i -> f t.[i])
+  let to_arrayi f t = Array.init (length t) (fun i -> f i t.[i])
+  let delete_end t n = sub t 0 (length t - n)
+  let delete_start t n = sub t n (length t - n)
   let to_int t = fold (fun acc c -> acc + Mdrp_char.order c) 0 t
 
   let split_on_char_non_empty sep t =

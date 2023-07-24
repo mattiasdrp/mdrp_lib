@@ -59,5 +59,20 @@ let rotations l =
  * [2; 3; 1]
  * [3; 1; 2]*)
 
+let take n l =
+  let rec aux i acc = function
+    | [] -> acc
+    | _ when i = 0 -> acc
+    | hd :: tl -> aux (i - 1) (hd :: acc) tl
+  in
+  List.rev (aux n [] l)
+
+let cartesian_product l1 l2 =
+  let rec aux acc = function
+    | [] -> acc
+    | hd1 :: tl -> aux (fold_left (fun acc hd2 -> (hd1, hd2) :: acc) acc l2) tl
+  in
+  aux [] l1
+
 let fold_lefti f acc l =
   snd (List.fold_left (fun (i, acc) v -> (i + 1, f acc i v)) (0, acc) l)

@@ -28,3 +28,4 @@ module Trie = Mdrp_trie
 module Trigo = Mdrp_trigo
 module Types = Mdrp_types
 module Value = Mdrp_value
+include Bool.Prelude

@@ -12,6 +12,9 @@ module type S = sig
     Format.formatter ->
     'a t ->
     unit
+
+  val find_predicate : (key -> 'a -> bool) -> 'a t -> key * 'a
+  (** [find_predicate f t] returns the first [(key, value)] pair such that [f key value] is [true]. *)
 end
 
 module Make (X : sig
@@ -30,4 +33,11 @@ struct
       pp ~pp_sep ~left ~right
         Mdrp_pair.(pp ~left:"" ~right:"" ~sep:": " X.pp ppv))
       ppf (bindings t)
+
+  let find_predicate (type a) f (t : a t) =
+    let exception Found of (key * a) in
+    try
+      iter (fun k v -> if f k v then raise (Found (k, v))) t;
+      raise Not_found
+    with Found res -> res
 end
