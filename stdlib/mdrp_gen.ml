@@ -1,18 +1,14 @@
 let init = Random.init
-
 let char () = char_of_int (33 + Random.int 94)
-
 let int n = Random.int n
-
 let fixed_string n = String.init n (fun _ -> char ())
-
 let string () = fixed_string (1 + Random.int 10)
 
 module type DigitValue = sig
-  include Mdrp_value.Value
+  include Mdrp_types.Printable
+  include Mdrp_types.Comparable with type t := t
 
   val zero : t
-
   val random : t -> t
 end
 
