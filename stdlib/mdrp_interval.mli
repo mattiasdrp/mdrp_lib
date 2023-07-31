@@ -14,6 +14,19 @@ end) : sig
   val included : V.t -> t -> bool
 
   (* Distinct Interval Map. The intervals can't intersect. *)
+  module Set : sig
+    type key = t
+    type 'a t
+
+    val empty : 'a t
+    val add_exn : V.t * V.t -> (V.t * V.t) t -> (V.t * V.t) t
+    val mem : 'a -> ('a * 'a) t -> bool
+    val min_opt : ('a * 'b) t -> 'a option
+    val max_opt : ('a * 'b) t -> 'b option
+    val pp : Format.formatter -> (V.t * V.t) t -> unit
+  end
+
+  (* Distinct Interval Map. The intervals can't intersect. *)
   module Map : sig
     type key = t
     type +'a t

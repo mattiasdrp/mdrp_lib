@@ -391,6 +391,10 @@ module Decimal = struct
 
     let odd_composites ?(start = 9) () = Seq.unfold odd_composites_aux start
 
+    let range min max =
+      let aux_range n = if n > max then None else Some (n, n + 1) in
+      Seq.unfold aux_range min
+
     (* Optimised with an array of only odd integers
        *)
     let primes_sieve_aux limit =
@@ -532,6 +536,21 @@ module Decimal = struct
 
     let binomials ?(start = 0) ?(limit = -1) () =
       Seq.unfold (binomials_aux limit) (start, 0)
+
+    (* TODO: Try to make it a Seq *)
+    let restricted_weak_composition ~n ~k ~min_value ~max_value =
+      let rec aux (n : int) (k : int) : int list list =
+        if k = 1 then [ [ n ] ]
+        else
+          Seq.fold_left
+            (fun acc v ->
+              List.rev_append
+                (List.map (fun rest -> v :: rest) (aux (n - v) (k - 1)))
+                acc)
+            []
+            (range min_value (min n max_value))
+      in
+      aux n k
   end
 end
 

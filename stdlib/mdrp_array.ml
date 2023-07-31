@@ -27,8 +27,6 @@ let equal eq t1 t2 =
   in
   Stdlib.Int.equal l1 l2 && aux 0
 
-let ( .?() ) a i = try Some (Array.get a i) with Invalid_argument _ -> None
-
 let swap a i j =
   let tmp = a.(i) in
   a.(i) <- a.(j);
@@ -41,15 +39,10 @@ let fold_lefti f x a =
   done;
   !r
 
-let iteri f a =
-  for i = 0 to length a - 1 do
-    f i (unsafe_get a i)
-  done
-
 let get_and_remove a i =
   let tmp = a.(i) in
   for k = i to Array.length a - 2 do
-    a.(k) <- a.(k + 1)
+    unsafe_set a k (unsafe_get a (k + 1))
   done;
   tmp
 
@@ -58,32 +51,33 @@ let[@inline] out_of_bounds a i = i < 0 || i >= Array.length a
 module Matrix = struct
   type 'a t = 'a array array
 
-  let[@inline] out_of_bounds m i j =
-    i < 0 || j < 0 || i >= Array.length m || j >= Array.length m.(0)
+  let[@inline] out_of_bounds m ~row ~col =
+    col < 0 || row < 0 || col >= Array.length m.(0) || row >= Array.length m
 
-  let moore_neighbourhood ?(keep_centre = false) m i j =
-    let maxi = i + 1 in
-    let maxj = j + 1 in
+  let moore_neighbourhood ?(keep_centre = false) m ~row ~col =
+    let max_col = col + 1 in
+    let max_row = row + 1 in
     let height = Array.length m in
     let width = Array.length m.(0) in
 
-    let rec moore_neighbourhood_aux (ni, nj) =
-      if ni = height || ni > maxi then None
-      else if ni < 0 || nj > maxj || nj = width then
-        moore_neighbourhood_aux (ni + 1, j - 1)
-      else if nj < 0 || ((not keep_centre) && ni = i && nj = j) then
-        moore_neighbourhood_aux (ni, nj + 1)
-      else Some ((ni, nj), (ni, nj + 1))
+    let rec moore_neighbourhood_aux (n_row, n_col) =
+      if n_row = height || n_row > max_row then None
+      else if n_row < 0 || n_col > max_col || n_col = width then
+        moore_neighbourhood_aux (n_row + 1, col - 1)
+      else if n_col < 0 || ((not keep_centre) && n_row = row && n_col = col)
+      then moore_neighbourhood_aux (n_row, n_col + 1)
+      else Some ((n_row, n_col), (n_row, n_col + 1))
     in
-    Seq.unfold moore_neighbourhood_aux (i - 1, j - 1)
+    Seq.unfold moore_neighbourhood_aux (row - 1, col - 1)
 
-  let neumann_neighbourhood m i j =
-    let l = [ (i, j + 1); (i + 1, j); (i, j - 1); (i - 1, j) ] in
-    let width = Array.length m.(0) in
-    let height = Array.length m in
+  let neumann_neighbourhood ?(keep_centre = false) m ~row ~col =
+    let l =
+      [ (row, col - 1); (row, col + 1); (row - 1, col); (row + 1, col) ]
+    in
+    let l = if keep_centre then (row, col) :: l else l in
     let rec neumann_neighbourhood_aux = function
       | [] -> None
-      | (i, j) :: tl when i < 0 || i = height || j < 0 || j = width ->
+      | (row, col) :: tl when out_of_bounds m ~row ~col ->
           neumann_neighbourhood_aux tl
       | c :: tl -> Some (c, tl)
     in
@@ -94,21 +88,25 @@ module Matrix = struct
     let dirs =
       [ (-1, -1); (0, -1); (1, -1); (1, 0); (1, 1); (0, 1); (-1, 1) ]
     in
-    fun p m i j ->
-      let rec all_directions_aux (ni, nj, di, dj, dirs) =
-        let ni, nj = (ni + di, nj + dj) in
-        if out_of_bounds m ni nj then
+    fun predicate m ~row ~col ->
+      let rec all_directions_aux (n_row, n_col, d_row, d_col, dirs) =
+        let n_row, n_col = (n_row + d_row, n_col + d_col) in
+        if out_of_bounds m ~row:n_row ~col:n_col then
           match dirs with
           | [] -> None
-          | (di, dj) :: tl -> all_directions_aux (i, j, di, dj, tl)
-        else if p m ni nj then all_directions_aux (ni, nj, di, dj, dirs)
+          | (d_row, d_col) :: tl ->
+              all_directions_aux (row, col, d_row, d_col, tl)
+        else if not (predicate m ~row:n_row ~col:n_col) then
+          all_directions_aux (n_row, n_col, d_row, d_col, dirs)
         else
           match dirs with
-          | [] -> Some ((ni, nj), (-1, -1, 0, 0, []))
-          | (di, dj) :: tl -> Some ((ni, nj), (i, j, di, dj, tl))
+          (* No more cells to find except the current one *)
+          | [] -> Some ((n_row, n_col), (-1, -1, 0, 0, []))
+          (* Return the current cell and move to the next direction *)
+          | (d_col, d_row) :: tl ->
+              Some ((n_row, n_col), (row, col, d_col, d_row, tl))
       in
-
-      Seq.unfold all_directions_aux (i, j, -1, 0, dirs)
+      Seq.unfold all_directions_aux (row, col, -1, 0, dirs)
 
   let pp_array = pp
 
@@ -128,11 +126,15 @@ module Matrix = struct
       t;
     Format.fprintf ppf "@]"
 
-  let fold f acc m =
+  let fold_left f acc m =
+    fold_left (fun acc v -> fold_left (fun acc v -> f acc v) acc v) acc m
+
+  let fold_lefti f acc m =
     fold_lefti
-      (fun i acc v -> fold_lefti (fun j acc v -> f acc i j v) acc v)
+      (fun row acc v -> fold_lefti (fun col acc v -> f acc ~row ~col v) acc v)
       acc m
 
-  let iter f m = iteri (fun i v -> iteri (fun j v -> f i j v) v) m
-  let width_height m = (Array.length m.(0), Array.length m)
+  let iter f m = iter (fun v -> iter (fun v -> f v) v) m
+  let iteri f m = iteri (fun row v -> iteri (fun col v -> f ~row ~col v) v) m
+  let rows_columns m = (Array.length m, Array.length m.(0))
 end

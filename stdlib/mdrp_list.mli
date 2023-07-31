@@ -36,3 +36,5 @@ val cartesian_product : 'a t -> 'b t -> ('a * 'b) t
     Tail recursive *)
 
 val fold_lefti : ('a -> int -> 'b -> 'a) -> 'a -> 'b t -> 'a
+(** Same as {!fold_left}, but the function is applied to the index of the element
+    as first argument, and the element itself as second argument. *)

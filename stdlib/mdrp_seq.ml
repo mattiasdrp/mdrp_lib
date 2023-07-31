@@ -55,9 +55,10 @@ let rec permut ({ n; i; cpt; a; first } as state) =
   else None
 
 let permutations l =
-  let n = Mdrp_list.length l in
+  let a = Mdrp_array.of_list l in
+  let n = Mdrp_array.length a in
   let cpt = Mdrp_array.init n (fun _ -> 0) in
-  unfold permut { n; i = 0; cpt; a = Mdrp_array.of_list l; first = true }
+  unfold permut { n; i = 0; cpt; a; first = true }
 
 let next_split (prev, next) =
   match next with
