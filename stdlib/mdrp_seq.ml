@@ -94,6 +94,9 @@ let subsets k l =
     else aux_subsets (k' + 1, index + 1, index :: indices, a.(index) :: picked)
   in
   if k = 0 || k > n then Seq.empty else Seq.unfold aux_subsets (1, 0, [], [])
+  let n = Mdrp_list.length l in
+  let cpt = Mdrp_array.init n (fun _ -> 0) in
+  unfold permut { n; i = 0; cpt; a = Mdrp_array.of_list l; first = true }
 
 let next_split (prev, next) =
   match next with
