@@ -22,6 +22,7 @@ module Parse = Mdrp_parse
 module Ring = Mdrp_ring
 module Seq = Mdrp_seq
 module Set = Mdrp_set
+module Str = Mdrp_str
 module String = Mdrp_string
 module Tree = Mdrp_tree
 module Trie = Mdrp_trie

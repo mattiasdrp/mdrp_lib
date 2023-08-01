@@ -4,7 +4,7 @@
 (library
  (name mdrp_lib)
  (public_name mdrp_lib)
- (libraries zarith)
+ (libraries zarith str)
  (modules_without_implementation mdrp_array_bu))
 
 (env
