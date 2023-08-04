@@ -25,12 +25,11 @@ val all_splits : 'a list -> ('a list * 'a list) t
  * [1; 2] [3]
  * *)
 
+val subsets : int -> 'a list -> 'a list Seq.t
+(** [subsets n l] returns all the subsets of [l] of size [n] as a sequence *)
+
 val find_opt : ('a -> bool) -> 'a t -> 'a option
-
 val findi_opt : (int -> 'a -> bool) -> 'a t -> 'a option
-
 val find_map : ('a -> 'b option) -> 'a t -> 'b option
-
 val findi_map : (int -> 'a -> 'b option) -> 'a t -> 'b option
-
 val find_fold : ('b -> 'a -> 'b * bool) -> 'b -> 'a t -> ('a * 'b) option

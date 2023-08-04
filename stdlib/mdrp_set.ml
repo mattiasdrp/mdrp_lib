@@ -23,6 +23,7 @@ struct
 
   let add_list l t = List.fold_left (fun acc e -> add e acc) t l
   let of_list l = add_list l empty
+  let to_list t = elements t
 
   let pp ?(pp_sep = fun ppf () -> Format.fprintf ppf "; ") ?(left = "[")
       ?(right = "]") () ppf t =

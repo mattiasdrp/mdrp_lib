@@ -60,6 +60,40 @@ let permutations l =
   let cpt = Mdrp_array.init n (fun _ -> 0) in
   unfold permut { n; i = 0; cpt; a; first = true }
 
+let subsets k l =
+  let a = Mdrp_array.of_list l in
+  let n = Mdrp_array.length a in
+  let length = Mdrp_array.length a in
+  let rec aux_subsets (k', index, indices, picked) =
+    if k' = k then
+      (* We need to pick one last element *)
+      if index = length then
+        let index, indices, picked =
+          match (indices, picked) with
+          | i :: il, _ :: pl -> (i, il, pl)
+          | _ -> assert false
+        in
+        aux_subsets (k' - 1, index + 1, indices, picked)
+      else
+        Some (List.rev (a.(index) :: picked), (k', index + 1, indices, picked))
+    else if
+      (* We can't add an element because there will be not enough
+         elements left *)
+      index > length - k'
+    then
+      let res =
+        match (indices, picked) with
+        | i :: il, _ :: pl -> Some (i, il, pl)
+        | _ -> None
+      in
+      match res with
+      | Some (index, indices, picked) ->
+          aux_subsets (k' - 1, index + 1, indices, picked)
+      | None -> None
+    else aux_subsets (k' + 1, index + 1, index :: indices, a.(index) :: picked)
+  in
+  if k = 0 || k > n then Seq.empty else Seq.unfold aux_subsets (1, 0, [], [])
+
 let next_split (prev, next) =
   match next with
   | [ _ ] | [] -> None
