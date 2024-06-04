@@ -34,31 +34,32 @@ let all_head_tails l = unfold next_split ([], l)
  *   aux ((zero, []), []) l *)
 
 type 'a state = {
-  n : int;
+  length : int;
   i : int;
   cpt : int array;
-  a : 'a array;
+  array : 'a array;
   first : bool;
 }
 
 (* State machine for Heap's algorithm *)
-let rec permut ({ n; i; cpt; a; first } as state) =
-  if first then Some (Mdrp_array.to_list a, { state with first = false })
-  else if i < n then
+let rec permut ({ length; i; cpt; array; first } as state) =
+  if first then Some (Mdrp_array.to_list array, { state with first = false })
+  else if i < length then
     if cpt.(i) < i then (
-      if i mod 2 = 0 then Mdrp_array.swap a 0 i else Mdrp_array.swap a cpt.(i) i;
+      if i mod 2 = 0 then Mdrp_array.swap array 0 i
+      else Mdrp_array.swap array cpt.(i) i;
       cpt.(i) <- cpt.(i) + 1;
-      Some (Mdrp_array.to_list a, { state with i = 0 }))
+      Some (Mdrp_array.to_list array, { state with i = 0 }))
     else (
       cpt.(i) <- 0;
       permut { state with i = state.i + 1 })
   else None
 
 let permutations l =
-  let a = Mdrp_array.of_list l in
-  let n = Mdrp_array.length a in
-  let cpt = Mdrp_array.init n (fun _ -> 0) in
-  unfold permut { n; i = 0; cpt; a; first = true }
+  let array = Mdrp_array.of_list l in
+  let length = Mdrp_array.length array in
+  let cpt = Mdrp_array.init length (fun _ -> 0) in
+  unfold permut { length; i = 0; cpt; array; first = true }
 
 let subsets k l =
   let a = Mdrp_array.of_list l in
