@@ -28,8 +28,7 @@ TODO")
    ocaml
    dune
   (odoc :with-doc)
- )
-)
+ ))
 
 (package
  (name mdrp_cards)
@@ -40,8 +39,7 @@ TODO")
    ocaml
    dune
   (odoc :with-doc)
- )
-)
+ ))
 
 (package
  (name mdrp_poker)
@@ -52,5 +50,4 @@ TODO")
    ocaml
    dune
   (odoc :with-doc)
- )
-)
+ ))
